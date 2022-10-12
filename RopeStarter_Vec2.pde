@@ -65,31 +65,31 @@ void mouseWheel(MouseEvent event){
 //Simulation Parameters
 float floor = 500;
 Vec2 gravity = new Vec2(0,400);
-float radius = 5;
-Vec2 obsticle = new Vec2(180,180);
+float radius = 1;
+Vec2 obsticle = new Vec2(180,100);
 float radiusObsticle = 20;
 Vec2 stringTop = new Vec2(200,50);
-float restLen = 10;
+float restLen = 4;
 float mass = 1.0; //TRY-IT: How does changing mass affect resting length of the rope?
 float k = 200; //TRY-IT: How does changing k affect resting length of the rope?
 float kv = 30; //TRY-IT: How big can you make kv?
 
 //Initial positions and velocities of masses
 static int maxNodes = 100;
-static int maxRope = 20;
+static int maxRope = 100;
 Vec2 pos[][] = new Vec2[maxRope][maxNodes];
 Vec2 vel[][] = new Vec2[maxRope][maxNodes];
 Vec2 acc[][] = new Vec2[maxRope][maxNodes];
 
 int numNodes = 10;
-int numRopes = 10;
+int numRopes = 50;
 
 void initScene(){
   for(int j = 0; j < numRopes; j++) {
     for (int i = 0; i < numNodes; i++){
       pos[j][i] = new Vec2(0,0);
-      pos[j][i].x = stringTop.x-50+10*j-20*i;
-      pos[j][i].y = stringTop.y + 8*i; //Make each node a little lower
+      pos[j][i].x = (stringTop.x -50 + 4*j-20*i)-100;
+      pos[j][i].y = (stringTop.y + 8*i); //Make each node a little lower
       vel[j][i] = new Vec2(0,0);
     }
   }
@@ -196,14 +196,6 @@ void draw() {
   camera.update(1.0/frameRate);
 
   directionalLight(255.0, 255.0, 255.0, 0, -1, -1);
-
-  // fill(20,200,150);
-  // for(int j = 0; j < numRopes; j++) {
-  //   for(int i = 0; i < numNodes; i++) {
-  //     circle(pos[j][i].x, pos[j][i].y, radius*2);
-  //   }
-  // }
-
 
   for(int i = 0; i < 20; i++)
   {
