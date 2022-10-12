@@ -27,18 +27,46 @@
 
 
 //Create Window
+Camera camera;
+
 String windowTitle = "Swinging Rope";
 void setup() {
-  size(400, 500, P3D);
+  size(600, 600, P3D);
+
+  camera = new Camera();
+
+  camera.position = new PVector(200,200,500);
+
   surface.setTitle(windowTitle);
   initScene();
+}
+
+void keyReleased()
+{
+  camera.HandleKeyReleased();
+}
+
+void mousePressed(){
+  camera.mousePressed(); 
+}
+
+void mouseReleased(){
+    camera.mouseReleased(); 
+}
+
+void mouseDragged(){
+   camera.mouseDragged(); 
+}
+
+void mouseWheel(MouseEvent event){
+  camera.mouseWheel(event);
 }
 
 //Simulation Parameters
 float floor = 500;
 Vec2 gravity = new Vec2(0,400);
 float radius = 5;
-Vec2 obsticle = new Vec2(150,150);
+Vec2 obsticle = new Vec2(180,180);
 float radiusObsticle = 20;
 Vec2 stringTop = new Vec2(200,50);
 float restLen = 10;
@@ -145,15 +173,44 @@ void update(float dt){
   
 }
 
+// Draws a scaled, textured quad at the given position.
+void drawTexturedQuad(PVector position, float scale, PImage texture)
+{
+  pushMatrix();
+  translate(position.x, position.y, position.z);
+  scale(scale, scale, scale);
+  beginShape();
+  texture(texture);
+  vertex(-1, -1, 0, 0, 0);
+  vertex(1, -1, 0, texture.width, 0);
+  vertex(1, 1, 0, texture.width, texture.height);
+  vertex(-1, 1, 0, 0, texture.height);
+  endShape();
+  popMatrix();
+} 
+
 //Draw the scene: one sphere per mass, one line connecting each pair
 boolean paused = true;
 void draw() {
-  background(255,255,255);
+  background(255);
+  camera.update(1.0/frameRate);
+
+  directionalLight(255.0, 255.0, 255.0, 0, -1, -1);
+
+  // fill(20,200,150);
+  // for(int j = 0; j < numRopes; j++) {
+  //   for(int i = 0; i < numNodes; i++) {
+  //     circle(pos[j][i].x, pos[j][i].y, radius*2);
+  //   }
+  // }
+
+
   for(int i = 0; i < 20; i++)
- {
-   if (!paused) update(1/(20*frameRate));
- }
-  fill(0,0,0);
+  {
+    if (!paused) update(1/(20*frameRate));
+  }
+ 
+  fill(20,200,150);
 
   for(int j = 0; j < numRopes; j++) {
     for (int i = 0; i < numNodes-1; i++){
@@ -188,8 +245,10 @@ void draw() {
 }
 
 void keyPressed(){
-  if (key == ' ')
+  if (key == ' ') {
     paused = !paused;
+  }
+  camera.HandleKeyPressed();
 }
 
 
@@ -197,98 +256,98 @@ void keyPressed(){
 // Vec2D Library
 ///////////////////
 
-public class Vec2 {
-  public float x, y;
+// public class Vec2 {
+//   public float x, y;
   
-  public Vec2(float x, float y){
-    this.x = x;
-    this.y = y;
-  }
+//   public Vec2(float x, float y){
+//     this.x = x;
+//     this.y = y;
+//   }
   
-  public String toString(){
-    return "(" + x+ ", " + y +")";
-  }
+//   public String toString(){
+//     return "(" + x+ ", " + y +")";
+//   }
   
-  public float length(){
-    return sqrt(x*x+y*y);
-  }
+//   public float length(){
+//     return sqrt(x*x+y*y);
+//   }
   
-  public float lengthSqr(){
-    return x*x+y*y;
-  }
+//   public float lengthSqr(){
+//     return x*x+y*y;
+//   }
   
-  public Vec2 plus(Vec2 rhs){
-    return new Vec2(x+rhs.x, y+rhs.y);
-  }
+//   public Vec2 plus(Vec2 rhs){
+//     return new Vec2(x+rhs.x, y+rhs.y);
+//   }
   
-  public void add(Vec2 rhs){
-    x += rhs.x;
-    y += rhs.y;
-  }
+//   public void add(Vec2 rhs){
+//     x += rhs.x;
+//     y += rhs.y;
+//   }
   
-  public Vec2 minus(Vec2 rhs){
-    return new Vec2(x-rhs.x, y-rhs.y);
-  }
+//   public Vec2 minus(Vec2 rhs){
+//     return new Vec2(x-rhs.x, y-rhs.y);
+//   }
   
-  public void subtract(Vec2 rhs){
-    x -= rhs.x;
-    y -= rhs.y;
-  }
+//   public void subtract(Vec2 rhs){
+//     x -= rhs.x;
+//     y -= rhs.y;
+//   }
   
-  public Vec2 times(float rhs){
-    return new Vec2(x*rhs, y*rhs);
-  }
+//   public Vec2 times(float rhs){
+//     return new Vec2(x*rhs, y*rhs);
+//   }
   
-  public void mul(float rhs){
-    x *= rhs;
-    y *= rhs;
-  }
+//   public void mul(float rhs){
+//     x *= rhs;
+//     y *= rhs;
+//   }
   
-  public void normalize(){
-    float magnitude = sqrt(x*x + y*y);
-    x /= magnitude;
-    y /= magnitude;
-  }
+//   public void normalize(){
+//     float magnitude = sqrt(x*x + y*y);
+//     x /= magnitude;
+//     y /= magnitude;
+//   }
   
-  public Vec2 normalized(){
-    float magnitude = sqrt(x*x + y*y);
-    return new Vec2(x/magnitude, y/magnitude);
-  }
+//   public Vec2 normalized(){
+//     float magnitude = sqrt(x*x + y*y);
+//     return new Vec2(x/magnitude, y/magnitude);
+//   }
   
-  public void clampToLength(float maxL){
-    float magnitude = sqrt(x*x + y*y);
-    if (magnitude > maxL){
-      x *= maxL/magnitude;
-      y *= maxL/magnitude;
-    }
-  }
+//   public void clampToLength(float maxL){
+//     float magnitude = sqrt(x*x + y*y);
+//     if (magnitude > maxL){
+//       x *= maxL/magnitude;
+//       y *= maxL/magnitude;
+//     }
+//   }
   
-  public void setToLength(float newL){
-    float magnitude = sqrt(x*x + y*y);
-    x *= newL/magnitude;
-    y *= newL/magnitude;
-  }
+//   public void setToLength(float newL){
+//     float magnitude = sqrt(x*x + y*y);
+//     x *= newL/magnitude;
+//     y *= newL/magnitude;
+//   }
   
-  public float distanceTo(Vec2 rhs){
-    float dx = rhs.x - x;
-    float dy = rhs.y - y;
-    return sqrt(dx*dx + dy*dy);
-  }
+//   public float distanceTo(Vec2 rhs){
+//     float dx = rhs.x - x;
+//     float dy = rhs.y - y;
+//     return sqrt(dx*dx + dy*dy);
+//   }
   
-}
+// }
 
-Vec2 interpolate(Vec2 a, Vec2 b, float t){
-  return a.plus((b.minus(a)).times(t));
-}
+// Vec2 interpolate(Vec2 a, Vec2 b, float t){
+//   return a.plus((b.minus(a)).times(t));
+// }
 
-float interpolate(float a, float b, float t){
-  return a + ((b-a)*t);
-}
+// float interpolate(float a, float b, float t){
+//   return a + ((b-a)*t);
+// }
 
-float dot(Vec2 a, Vec2 b){
-  return a.x*b.x + a.y*b.y;
-}
+// float dot(Vec2 a, Vec2 b){
+//   return a.x*b.x + a.y*b.y;
+// }
 
-Vec2 projAB(Vec2 a, Vec2 b){
-  return b.times(a.x*b.x + a.y*b.y);
-}
+// Vec2 projAB(Vec2 a, Vec2 b){
+//   return b.times(a.x*b.x + a.y*b.y);
+// }
