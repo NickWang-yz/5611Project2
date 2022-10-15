@@ -64,11 +64,11 @@ void mouseWheel(MouseEvent event){
 
 //Simulation Parameters
 float floor = 500;
-Vec2 gravity = new Vec2(0,400);
+PVector gravity = new PVector(0,400.0);
 float radius = 1;
-Vec2 obsticle = new Vec2(180,100);
+PVector obsticle = new PVector(180,100,0);
 float radiusObsticle = 20;
-Vec2 stringTop = new Vec2(200,50);
+PVector stringTop = new PVector(200,50,0);
 float restLen = 4;
 float mass = 1.0; //TRY-IT: How does changing mass affect resting length of the rope?
 float k = 200; //TRY-IT: How does changing k affect resting length of the rope?
@@ -77,9 +77,9 @@ float kv = 30; //TRY-IT: How big can you make kv?
 //Initial positions and velocities of masses
 static int maxNodes = 100;
 static int maxRope = 100;
-Vec2 pos[][] = new Vec2[maxRope][maxNodes];
-Vec2 vel[][] = new Vec2[maxRope][maxNodes];
-Vec2 acc[][] = new Vec2[maxRope][maxNodes];
+PVector pos[][] = new PVector[maxRope][maxNodes];
+PVector vel[][] = new PVector[maxRope][maxNodes];
+PVector acc[][] = new PVector[maxRope][maxNodes];
 
 int numNodes = 10;
 int numRopes = 50;
@@ -87,10 +87,10 @@ int numRopes = 50;
 void initScene(){
   for(int j = 0; j < numRopes; j++) {
     for (int i = 0; i < numNodes; i++){
-      pos[j][i] = new Vec2(0,0);
-      pos[j][i].x = (stringTop.x -50 + 4*j-20*i)-100;
-      pos[j][i].y = (stringTop.y + 8*i); //Make each node a little lower
-      vel[j][i] = new Vec2(0,0);
+      pos[j][i] = new PVector(0,50,0);
+      pos[j][i].x = (stringTop.x -50 + 4*j)-100;
+      pos[j][i].z = (stringTop.y + 8*i)-50; //Make each node a little lower
+      vel[j][i] = new PVector(0,0,0);
     }
   }
 }
@@ -100,42 +100,44 @@ void update(float dt){
   //Reset accelerations each timestep (momenum only applies to velocity)
   for(int j = 0; j < numRopes; j++) {
     for (int i = 0; i < numNodes; i++){
-      acc[j][i] = new Vec2(0,0);
+      acc[j][i] = new PVector(0,0,0);
       acc[j][i].add(gravity);
     }
   }
   
   for(int j = 0; j < numRopes-1; j++) {
     for(int i = 0; i < numNodes; i++) {
-      Vec2 diff = pos[j+1][i].minus(pos[j][i]);
-      float stringF = -k*(diff.length() - restLen);
+      PVector diff = PVector.sub(pos[j+1][i], pos[j][i]);
+      float stringF = -k*(diff.mag() - restLen);
 
-      Vec2 stringDir = diff.normalized();
-      float projVbot = dot(vel[j][i], stringDir);
-      float projVtop = dot(vel[j+1][i], stringDir);
+      PVector stringDir = diff;
+      stringDir.normalize();
+      float projVbot = PVector.dot(vel[j][i], stringDir);
+      float projVtop = PVector.dot(vel[j+1][i], stringDir);
       float dampF = -kv*(projVtop - projVbot);
 
-      Vec2 force = stringDir.times(stringF+dampF);
-      acc[j][i].add(force.times(-1.0/mass));
-      acc[j+1][i].add(force.times(1.0/mass));
+      PVector force = PVector.mult(stringDir,(stringF+dampF));
+      acc[j][i].add(PVector.mult(force,(-1.0/mass)));
+      acc[j+1][i].add(PVector.mult(force,(1.0/mass)));
     }
   }
 
   //Compute (damped) Hooke's law for each spring
   for(int j = 0; j < numRopes; j++) {
     for (int i = 0; i < numNodes-1; i++){
-      Vec2 diff = pos[j][i+1].minus(pos[j][i]);
-      float stringF = -k*(diff.length() - restLen);
+      PVector diff = PVector.sub(pos[j][i+1],pos[j][i]);
+      float stringF = -k*(diff.mag() - restLen);
       //println(stringF,diff.length(),restLen);
       
-      Vec2 stringDir = diff.normalized();
-      float projVbot = dot(vel[j][i], stringDir);
-      float projVtop = dot(vel[j][i+1], stringDir);
+      PVector stringDir = diff;
+      stringDir.normalize();
+      float projVbot = PVector.dot(vel[j][i], stringDir);
+      float projVtop = PVector.dot(vel[j][i+1], stringDir);
       float dampF = -kv*(projVtop - projVbot);
       
-      Vec2 force = stringDir.times(stringF+dampF);
-      acc[j][i].add(force.times(-1.0/mass));
-      acc[j][i+1].add(force.times(1.0/mass));
+      PVector force = PVector.mult(stringDir,(stringF+dampF));
+      acc[j][i].add(PVector.mult(force,(-1.0/mass)));
+      acc[j][i+1].add(PVector.mult(force,(1.0/mass)));
       
     }
   }
@@ -143,15 +145,15 @@ void update(float dt){
   //Eulerian integration
   for(int j = 0; j < numRopes; j++) {
     for (int i = 1; i < numNodes; i++){
-      vel[j][i].add(acc[j][i].times(dt));
-      pos[j][i].add(vel[j][i].times(dt));
+      vel[j][i].add(PVector.mult(acc[j][i],(dt)));
+      pos[j][i].add(PVector.mult(vel[j][i],(dt)));
     }
   }
   
   //Collision detection and response
   for(int j = 0; j < numRopes; j++) {
     for (int i = 0; i < numNodes; i++){
-      if (pos[j][i].y+radius > floor){
+      if (pos[j][i].z+radius > floor){
         vel[j][i].y *= -.9;
         pos[j][i].y = floor - radius;
       }
@@ -160,13 +162,14 @@ void update(float dt){
 
   for(int j = 0; j < numRopes; j++) {
     for(int i = 0; i < numNodes; i++) {
-      float d = pos[j][i].distanceTo(obsticle);
+      float d = pos[j][i].dist(obsticle);
       if(d < radiusObsticle +0.09) {
-        Vec2 n = pos[j][i].minus(obsticle).normalized();
-        float lengthInDirection = dot(n, vel[j][i]);
-        Vec2 bounce = n.times(lengthInDirection);
-        vel[j][i].subtract(bounce.times(1.5));
-        pos[j][i].add(n.times(0.1+radiusObsticle-d));
+        PVector n = PVector.sub(pos[j][i],(obsticle));
+        n.normalize();
+        float lengthInDirection = PVector.dot(n, vel[j][i]);
+        PVector bounce = PVector.mult(n,(lengthInDirection));
+        vel[j][i].sub(PVector.mult(bounce,(1.5)));
+        pos[j][i].add(PVector.mult(n,(0.1+radiusObsticle-d)));
       }
     }
   }
@@ -207,8 +210,8 @@ void draw() {
   for(int j = 0; j < numRopes; j++) {
     for (int i = 0; i < numNodes-1; i++){
       pushMatrix();
-      line(pos[j][i].x,pos[j][i].y,pos[j][i+1].x,pos[j][i+1].y);
-      translate(pos[j][i+1].x,pos[j][i+1].y);
+      line(pos[j][i].x,pos[j][i].y,pos[j][i].z,pos[j][i+1].x,pos[j][i+1].y,pos[j][i+1].z);
+      translate(pos[j][i+1].x,pos[j][i+1].y,pos[j][i+1].z);
       sphere(radius);
       popMatrix();
     }
@@ -217,7 +220,7 @@ void draw() {
   for(int j = 0; j < numRopes-1; j++) {
     for (int i = 0; i < numNodes; i++){
       pushMatrix();
-      line(pos[j][i].x,pos[j][i].y,pos[j+1][i].x,pos[j+1][i].y);
+      line(pos[j][i].x,pos[j][i].y,pos[j][i].z,pos[j+1][i].x,pos[j+1][i].y,pos[j+1][i].z);
       popMatrix();
     }
   }
@@ -225,7 +228,7 @@ void draw() {
   
   
   pushMatrix();
-  translate(obsticle.x,obsticle.y);
+  translate(obsticle.x,obsticle.y,obsticle.z);
   fill(255,0,0);
   sphere(radiusObsticle);
   popMatrix();
@@ -242,104 +245,3 @@ void keyPressed(){
   }
   camera.HandleKeyPressed();
 }
-
-
-///////////////////
-// Vec2D Library
-///////////////////
-
-// public class Vec2 {
-//   public float x, y;
-  
-//   public Vec2(float x, float y){
-//     this.x = x;
-//     this.y = y;
-//   }
-  
-//   public String toString(){
-//     return "(" + x+ ", " + y +")";
-//   }
-  
-//   public float length(){
-//     return sqrt(x*x+y*y);
-//   }
-  
-//   public float lengthSqr(){
-//     return x*x+y*y;
-//   }
-  
-//   public Vec2 plus(Vec2 rhs){
-//     return new Vec2(x+rhs.x, y+rhs.y);
-//   }
-  
-//   public void add(Vec2 rhs){
-//     x += rhs.x;
-//     y += rhs.y;
-//   }
-  
-//   public Vec2 minus(Vec2 rhs){
-//     return new Vec2(x-rhs.x, y-rhs.y);
-//   }
-  
-//   public void subtract(Vec2 rhs){
-//     x -= rhs.x;
-//     y -= rhs.y;
-//   }
-  
-//   public Vec2 times(float rhs){
-//     return new Vec2(x*rhs, y*rhs);
-//   }
-  
-//   public void mul(float rhs){
-//     x *= rhs;
-//     y *= rhs;
-//   }
-  
-//   public void normalize(){
-//     float magnitude = sqrt(x*x + y*y);
-//     x /= magnitude;
-//     y /= magnitude;
-//   }
-  
-//   public Vec2 normalized(){
-//     float magnitude = sqrt(x*x + y*y);
-//     return new Vec2(x/magnitude, y/magnitude);
-//   }
-  
-//   public void clampToLength(float maxL){
-//     float magnitude = sqrt(x*x + y*y);
-//     if (magnitude > maxL){
-//       x *= maxL/magnitude;
-//       y *= maxL/magnitude;
-//     }
-//   }
-  
-//   public void setToLength(float newL){
-//     float magnitude = sqrt(x*x + y*y);
-//     x *= newL/magnitude;
-//     y *= newL/magnitude;
-//   }
-  
-//   public float distanceTo(Vec2 rhs){
-//     float dx = rhs.x - x;
-//     float dy = rhs.y - y;
-//     return sqrt(dx*dx + dy*dy);
-//   }
-  
-// }
-
-// Vec2 interpolate(Vec2 a, Vec2 b, float t){
-//   return a.plus((b.minus(a)).times(t));
-// }
-
-// float interpolate(float a, float b, float t){
-//   return a + ((b-a)*t);
-// }
-
-// float dot(Vec2 a, Vec2 b){
-//   return a.x*b.x + a.y*b.y;
-// }
-
-// Vec2 projAB(Vec2 a, Vec2 b){
-//   return b.times(a.x*b.x + a.y*b.y);
-// }
