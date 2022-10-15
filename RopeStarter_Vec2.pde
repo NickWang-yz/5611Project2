@@ -35,7 +35,7 @@ void setup() {
 
   camera = new Camera();
 
-  camera.position = new PVector(200,200,500);
+  camera.position = new PVector(158,100,170);
 
   surface.setTitle(windowTitle);
   initScene();
@@ -89,7 +89,7 @@ void initScene(){
     for (int i = 0; i < numNodes; i++){
       pos[j][i] = new PVector(0,50,0);
       pos[j][i].x = (stringTop.x -50 + 4*j)-100;
-      pos[j][i].z = (stringTop.y + 8*i)-50; //Make each node a little lower
+      pos[j][i].z = (stringTop.y + 8*i)-90; //Make each node a little lower
       vel[j][i] = new PVector(0,0,0);
     }
   }
@@ -169,11 +169,14 @@ void update(float dt){
         float lengthInDirection = PVector.dot(n, vel[j][i]);
         PVector bounce = PVector.mult(n,(lengthInDirection));
         vel[j][i].sub(PVector.mult(bounce,(1.5)));
+        //pos[j][i] = PVector.mult(n, radiusObsticle+0.1);
         pos[j][i].add(PVector.mult(n,(0.1+radiusObsticle-d)));
       }
     }
   }
   
+
+  println("camera: ", camera.position.x, camera.position.y, camera.position.z);
 }
 
 // Draws a scaled, textured quad at the given position.
@@ -222,6 +225,24 @@ void draw() {
       pushMatrix();
       line(pos[j][i].x,pos[j][i].y,pos[j][i].z,pos[j+1][i].x,pos[j+1][i].y,pos[j+1][i].z);
       popMatrix();
+    }
+  }
+
+
+  fill(0,255,0);
+  for(int j = 0; j < numRopes-1; j++) {
+    for(int i = 0; i < numNodes-1; i++) {
+      beginShape();
+      vertex(pos[j][i].x, pos[j][i].y, pos[j][i].z);
+      vertex(pos[j+1][i].x, pos[j+1][i].y, pos[j+1][i].z);
+      vertex(pos[j][i+1].x, pos[j][i+1].y, pos[j][i+1].z);
+      endShape();
+
+      beginShape();
+      vertex(pos[j+1][i].x, pos[j+1][i].y, pos[j+1][i].z);
+      vertex(pos[j+1][i+1].x, pos[j+1][i+1].y, pos[j+1][i+1].z);
+      vertex(pos[j][i+1].x, pos[j][i+1].y, pos[j][i+1].z);
+      endShape();
     }
   }
   
