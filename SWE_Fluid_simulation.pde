@@ -37,11 +37,12 @@ void initScene() {
         rect_y[i] = 400;
     }
 
-    h[10] = 200;
+    for(int i = 10; i < 20; i++) {
+        h[i] = 200-i;
+    }
 }
 
 void update(float dt) {
-    println("in update");
     for(int i = 0; i < n-1; i++) {
         h_mid[i] = (h[i]+h[i+1])/2;
         hu_mid[i] = (hu[i]+hu[i+1])/2;
@@ -72,6 +73,11 @@ void update(float dt) {
         hu[i] += damp*dhudt[i]*dt;
     }
 
+    h[0] = h[n-2];
+    h[n-1] = h[1];
+
+    hu[0] = hu[n-2];
+    hu[n-1] = hu[1];
 }
 
 boolean paused = true;
@@ -84,11 +90,10 @@ void draw() {
         if (!paused) update(dt);
     }
 
-    for(int i = 0; i < n-1; i++) {
+    for(int i = 0; i < n; i++) {
         rect(rect_x[i], rect_y[i], 600/n, -h[i]);
         
     }
-    println("10: ", h[10]);
 
     if (paused)
         surface.setTitle(windowTitle + " [PAUSED]");
