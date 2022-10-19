@@ -64,12 +64,12 @@ void mouseWheel(MouseEvent event){
 
 //Simulation Parameters
 float floor = 500;
-PVector gravity = new PVector(0,400.0);
+PVector gravity = new PVector(0,400.0,0);
 float radius = 1;
 PVector obsticle = new PVector(180,100,0);
-float radiusObsticle = 20;
+float radiusObsticle = 25;
 PVector stringTop = new PVector(200,50,0);
-float restLen = 4;
+float restLen = 1;
 float mass = 1.0; //TRY-IT: How does changing mass affect resting length of the rope?
 float k = 200; //TRY-IT: How does changing k affect resting length of the rope?
 float kv = 30; //TRY-IT: How big can you make kv?
@@ -84,11 +84,14 @@ PVector acc[][] = new PVector[maxRope][maxNodes];
 int numNodes = 10;
 int numRopes = 50;
 
+PVector windDirection = new PVector(0, 0, 1);
+float windMagnitude = 0;
+
 void initScene(){
   for(int j = 0; j < numRopes; j++) {
     for (int i = 0; i < numNodes; i++){
       pos[j][i] = new PVector(0,50,0);
-      pos[j][i].x = (stringTop.x -50 + 4*j)-100;
+      pos[j][i].x = (stringTop.x -50 + restLen*j)+8;
       pos[j][i].z = (stringTop.y + 8*i)-90; //Make each node a little lower
       vel[j][i] = new PVector(0,0,0);
     }
@@ -145,10 +148,12 @@ void update(float dt){
   //Eulerian integration
   for(int j = 0; j < numRopes; j++) {
     for (int i = 1; i < numNodes; i++){
+      acc[j][i].add(PVector.mult(windDirection, windMagnitude));
       vel[j][i].add(PVector.mult(acc[j][i],(dt)));
       pos[j][i].add(PVector.mult(vel[j][i],(dt)));
     }
   }
+  println("acc[9][9]: ", acc[9][9].x, " ", acc[9][9].y, " ", acc[9][9].z);
   
   //Collision detection and response
   for(int j = 0; j < numRopes; j++) {
@@ -174,9 +179,9 @@ void update(float dt){
       }
     }
   }
-  
 
-  println("camera: ", camera.position.x, camera.position.y, camera.position.z);
+  //println("camera: ", camera.position.x, camera.position.y, camera.position.z);
+  println("windmagnitude: ", windMagnitude);
 }
 
 // Draws a scaled, textured quad at the given position.
@@ -203,9 +208,9 @@ void draw() {
 
   directionalLight(255.0, 255.0, 255.0, 0, -1, -1);
 
-  for(int i = 0; i < 20; i++)
+  for(int i = 0; i < 40; i++)
   {
-    if (!paused) update(1/(20*frameRate));
+    if (!paused) update(1/(40*frameRate));
   }
  
   fill(20,200,150);
@@ -263,6 +268,16 @@ void draw() {
 void keyPressed(){
   if (key == ' ') {
     paused = !paused;
+  }
+
+  if(key == 'h') {
+    if(windMagnitude < 210) {
+      windMagnitude+=10;
+    }
+    else {
+      println("Woops, the wind can't be larger!");
+    }
+    
   }
   camera.HandleKeyPressed();
 }
