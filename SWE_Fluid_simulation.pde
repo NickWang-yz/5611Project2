@@ -1,11 +1,11 @@
 String windowTitle = "SWE Fluid Simulation";
 
-static int n = 30;
+static int n = 50;
 float dx = 500.0/n;
 float g = 400;
 float damp = 0.9;
 float dt = 0.01;
-float sim_dt = 0.001;
+float sim_dt = 0.005;
 
 float h[] = new float[n];
 float hu[] = new float[n];
@@ -20,6 +20,10 @@ float dhudt_mid[] = new float[n];
 
 int rect_x[] = new int[n];
 int rect_y[] = new int[n];
+
+boolean periodic = true;
+boolean free = false;
+boolean reflective = false;
 
 void setup() {
   size(600, 400, P3D);
@@ -37,8 +41,12 @@ void initScene() {
         rect_y[i] = 400;
     }
 
+    for(int i = 1; i < 10; i++) {
+        h[i] = 100+10*i;
+    }
+
     for(int i = 10; i < 20; i++) {
-        h[i] = 200-i;
+        h[i] = 200-10*(i-10);
     }
 }
 
@@ -73,11 +81,31 @@ void update(float dt) {
         hu[i] += damp*dhudt[i]*dt;
     }
 
-    h[0] = h[n-2];
-    h[n-1] = h[1];
+    if(periodic) {
+        //periodic
+        h[0] = h[n-2];
+        h[n-1] = h[1];
 
-    hu[0] = hu[n-2];
-    hu[n-1] = hu[1];
+        hu[0] = hu[n-2];
+        hu[n-1] = hu[1];
+    }
+    else if(free) {
+        //free
+        h[0] = h[1];
+        h[n-1] = h[n-2];
+
+        hu[0] = hu[1];
+        hu[n-1] = hu[n-2];
+    }
+    else {
+        //reflective
+        h[0] = h[1];
+        h[n-1] = h[n-2];
+
+        hu[0] = -hu[1];
+        hu[n-1] = -hu[n-2];
+    }
+        
 }
 
 boolean paused = true;
@@ -104,5 +132,23 @@ void draw() {
 void keyPressed(){
   if (key == ' ') {
     paused = !paused;
+  }
+
+  if(key == '1') {
+    periodic = true;
+    free = false;
+    reflective = false;
+  }
+
+  if(key == '2') {
+    periodic = false;
+    free = true;
+    reflective = false;
+  }
+
+  if(key == '3') {
+    periodic = false;
+    free = false;
+    reflective = true;
   }
 }
