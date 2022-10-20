@@ -152,3 +152,17 @@ void keyPressed(){
     reflective = true;
   }
 }
+
+void mousePressed() {
+    if(!paused) {
+        if(mousePressed) {
+            int clickPos = mouseX / (600/n);
+            for(int i = clickPos; i < n && i < clickPos+10; i++) {
+                h[i] = 200 - 10*(i-clickPos);
+            }
+            for(int i = clickPos; i >= 0 && i > clickPos-10; i--) {
+                h[i] = 200 - 10*(clickPos-i);
+            }
+        }
+    }
+}
