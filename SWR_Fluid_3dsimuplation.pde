@@ -18,15 +18,21 @@ float dhudt[] = new float[n]; //Momentum(Midpoint)
 float dhdt_mid[] = new float[n];
 float dhudt_mid[] = new float[n];
 
-int rect_x[] = new int[n];
-int rect_y[] = new int[n];
+float rect_x[] = new float[n];
+float rect_y[] = new float[n];
 
 boolean periodic = true;
 boolean free = false;
 boolean reflective = false;
 
+Camera camera = new Camera();;
+
 void setup() {
   size(600, 400, P3D);
+
+  camera.position = new PVector(312,422,498);
+  camera.phi = 1;
+
   surface.setTitle(windowTitle);
   initScene();
 }
@@ -38,7 +44,6 @@ void initScene() {
         dhdt[i] = 0;
         dhudt[i] = 0;
         rect_x[i] = (600/n)*i;
-        rect_y[i] = 400;
     }
 
     for(int i = 1; i < 10; i++) {
@@ -47,6 +52,10 @@ void initScene() {
 
     for(int i = 10; i < 20; i++) {
         h[i] = 200-10*(i-10);
+    }
+    
+    for(int i = 0; i < n; i++) {
+      rect_y[i] = (h[i]+100)/2;
     }
 }
 
@@ -76,9 +85,10 @@ void update(float dt) {
         dhudt[i] = -(dhu2dx + .5*dgh2dx);
     }
 
-    for(int i = 0; i < n-1; i++) {
+    for(int i = 0; i < n; i++) {
         h[i] += damp*dhdt[i]*dt;
         hu[i] += damp*dhudt[i]*dt;
+        rect_y[i] = (h[i]+100)/2;
     }
 
     if(periodic) {
@@ -111,22 +121,74 @@ void update(float dt) {
 boolean paused = true;
 void draw() {
     background(255);
+    camera.update(1.0/frameRate);
 
-    fill(0, 0, 255);
+    directionalLight(255.0, 255.0, 255.0, 0, -1, -1);
+
+    
 
     for (int i = 0; i < int(dt/sim_dt); i++) {
         if (!paused) update(dt);
     }
 
+    fill(0,255,0);
+    pushMatrix();
+    translate(rect_x[25]-6, -250, 200);
+    box(600, 10, 400);
+    popMatrix();
+
+    fill(0,255,0);
+    pushMatrix();
+    translate(0, 0, 200);
+    box(10, 500, 400);
+    popMatrix();
+
+    fill(0,255,0);
+    pushMatrix();
+    translate(rect_x[25]-6, 250, 200);
+    box(600, 10, 400);
+    popMatrix();
+
+    fill(0,255,0);
+    pushMatrix();
+    translate(rect_x[49], 0, 200);
+    box(10, 500, 400);
+    popMatrix();
+
+    fill(0, 0, 255);    
     for(int i = 0; i < n; i++) {
-        rect(rect_x[i], rect_y[i], 600/n, -h[i]);
-        
+      pushMatrix();  
+      translate(rect_x[i], 0, rect_y[i]);
+      box(600/n, 500, h[i]);
+      popMatrix();
     }
+    //println(camera.theta, " ", camera.phi);
 
     if (paused)
         surface.setTitle(windowTitle + " [PAUSED]");
     else
         surface.setTitle(windowTitle + " "+ nf(frameRate,0,2) + "FPS");
+}
+
+void keyReleased()
+{
+  camera.HandleKeyReleased();
+}
+
+void mousePressed(){
+  camera.mousePressed(); 
+}
+
+void mouseReleased(){
+    camera.mouseReleased(); 
+}
+
+void mouseDragged(){
+   camera.mouseDragged(); 
+}
+
+void mouseWheel(MouseEvent event){
+  camera.mouseWheel(event);
 }
 
 void keyPressed(){
@@ -151,18 +213,6 @@ void keyPressed(){
     free = false;
     reflective = true;
   }
-}
 
-void mousePressed() {
-    if(!paused) {
-        if(mousePressed) {
-            int clickPos = mouseX / (600/n);
-            for(int i = clickPos; i < n && i < clickPos+10; i++) {
-                h[i] = 200 - 10*(i-clickPos);
-            }
-            for(int i = clickPos; i >= 0 && i > clickPos-10; i--) {
-                h[i] = 200 - 10*(clickPos-i);
-            }
-        }
-    }
+  camera.HandleKeyPressed();
 }
