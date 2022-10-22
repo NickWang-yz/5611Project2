@@ -158,7 +158,7 @@ void update(float dt){
 
   for(int j = 0; j < numRopes; j++) {
     for (int i = 1; i < numNodes; i++){
-      if(windMagnitude > 220){
+      if(windMagnitude > 330){
         numNodes = 5;
         numNodes2 = 5;
         windBreak = true;
@@ -380,27 +380,27 @@ void draw() {
  
   fill(20,200,150);
 
-  for(int j = 0; j < numRopes; j++) {
-    for (int i = 0; i < numNodes-1; i++){
-      pushMatrix();
-      line(pos[j][i].x,pos[j][i].y,pos[j][i].z,pos[j][i+1].x,pos[j][i+1].y,pos[j][i+1].z);
-      translate(pos[j][i+1].x,pos[j][i+1].y,pos[j][i+1].z);
-      sphere(radius);
-      popMatrix();
-    }
-  }
+  // for(int j = 0; j < numRopes; j++) {
+  //   for (int i = 0; i < numNodes-1; i++){
+  //     pushMatrix();
+  //     line(pos[j][i].x,pos[j][i].y,pos[j][i].z,pos[j][i+1].x,pos[j][i+1].y,pos[j][i+1].z);
+  //     translate(pos[j][i+1].x,pos[j][i+1].y,pos[j][i+1].z);
+  //     sphere(radius);
+  //     popMatrix();
+  //   }
+  // }
 
-  for(int j = 0; j < numRopes-1; j++) {
-    for (int i = 0; i < numNodes; i++){
-      pushMatrix();
-      line(pos[j][i].x,pos[j][i].y,pos[j][i].z,pos[j+1][i].x,pos[j+1][i].y,pos[j+1][i].z);
-      popMatrix();
-    }
-  }
+  // for(int j = 0; j < numRopes-1; j++) {
+  //   for (int i = 0; i < numNodes; i++){
+  //     pushMatrix();
+  //     line(pos[j][i].x,pos[j][i].y,pos[j][i].z,pos[j+1][i].x,pos[j+1][i].y,pos[j+1][i].z);
+  //     popMatrix();
+  //   }
+  // }
 
 
   fill(0,255,0);
-  // strokeWeight(0);
+  strokeWeight(0);
   for(int j = 0; j < numRopes-1; j++) {
     for(int i = 0; i < numNodes-1; i++) {
       beginShape();

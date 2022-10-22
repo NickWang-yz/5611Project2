@@ -1,18 +1,19 @@
 # 5611Project2
 
-### 1 Mutiple Ropes(45 points)
-Mutiple Ropes was implemnted
-<img src="VideoSrc/mutiRope.mov" alt="drawing" width="50%"/> <br />
+### 1 Mutiple Ropes(45 points) and 2 Cloth Simulation(20 points)
+Multiple Ropes were implemented with all necessary forces. We can clearly see the length difference as a result of damping forces. In the effort to turn it to a cloth. All adjoint nodes are connected. Nodes on cloth will be affected by the forces exhausted by all surrounding nodes. 
 
-### 2 Cloth Simulation(20 points)
+<img src="VideoSrc/mutiRope.gif" alt="drawing" width="50%"/> <br />
 
-### 3 3D Simulation(10 points)
+### 3 3D Simulation(10 points) and 4 High0quality Rendering(5 points)
+We hide all the lines and dots used for cloth simulation before implementing a 3D view of this simulation. We toggle the light and camera to achieve optimal effect. 
 
-### 4 High0quality Rendering(5 points)
+<img src="VideoSrc/3D.gif" alt="drawing" width="50%"/> <br />
 
-### 5 Air Darg for Cloth(10 points)
-
-### 6 Ripping/Tearing(10 points)
+### 5 Air Darg for Cloth(10 points) and 6 Ripping/Tearing(10 points)
+AWind force will be applied at the back of the cloth. Area velocity will increase 10 every time the user presses the “h” key. Wind will force the cloth to interact with the obstacle. If the velocity gets really big, the cloth will break and all forces related to the remaining cloth will be recalcuted. Since the velocity is considerably large, the part of cloth that is being ripped off will disappear(blown outside of this window). 
+<img src="VideoSrc/air.gif" alt="drawing" width="50%"/> <br />
+<img src="VideoSrc/break.gif" alt="drawing" width="50%"/> <br />
 
 ### 7
 
