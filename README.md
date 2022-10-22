@@ -15,9 +15,12 @@ AWind force will be applied at the back of the cloth. Area velocity will increas
 <img src="VideoSrc/air.gif" alt="drawing" width="50%"/> <br />
 <img src="VideoSrc/break.gif" alt="drawing" width="50%"/> <br />
 
-### 7
+### 7 Continuum Fluid Simulation 
+Implemented 1D shallow water simulation. Large amounts of water are placed at the high place. Once space is pressed, water are released and we will be able to see the water simulation. 
 
-### 8
+<img src="VideoSrc/water.gif" alt="drawing" width="50%"/> <br />
+
+
 # Difficulties we encoutred. 
 One of the hardest difficulties we encountered is how to determine which part of the cloth should be ripped. After discussion, we arrived at three possible methods. One is to check the current wind speed. When the wind speed reaches the curtain threshold, half of the cloth will be ripped off. Second one is to check the velocity of each node. Once it reaches a certain threshold, half of the cloth will be ripped off. The third one, which is the most sophisticated one, is to set a limit on the distance between two adjoint nodes. Once the displacement exceeds that limit, the bond between those two nodes will break. The problem with this is we have to rewrite most of the functions to accommodate this change. We also need to consider the scenarios in which only one of the two strings is attached to the node.
 Another issue that arises is how to apply air buoyancy and air resistance on cloth since those two forces also play an important role in cloth simulation. 
