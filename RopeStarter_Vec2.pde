@@ -66,12 +66,12 @@ void mouseWheel(MouseEvent event){
 float floor = 500;
 PVector gravity = new PVector(0,400.0,0);
 float radius = 1;
-PVector obsticle = new PVector(180,100,0);
+PVector obsticle = new PVector(180,90,10);
 float radiusObsticle = 25;
 PVector stringTop = new PVector(200,50,0);
 float restLen = 1;
 float mass = 1.0; //TRY-IT: How does changing mass affect resting length of the rope?
-float k = 200; //TRY-IT: How does changing k affect resting length of the rope?
+float k = 250; //TRY-IT: How does changing k affect resting length of the rope?
 float kv = 30; //TRY-IT: How big can you make kv?
 
 //Initial positions and velocities of masses
@@ -83,7 +83,7 @@ PVector acc[][] = new PVector[maxRope][maxNodes];
 
 int numNodes = 10;
 int numRopes = 50;
-
+int numNode2 =0;
 PVector windDirection = new PVector(0, 0, 1);
 float windMagnitude = 0;
 
@@ -117,7 +117,7 @@ void update(float dt){
       stringDir.normalize();
       float projVbot = PVector.dot(vel[j][i], stringDir);
       float projVtop = PVector.dot(vel[j+1][i], stringDir);
-      float dampF = -kv*(projVtop - projVbot);
+      float dampF = -kv*1.2*(projVtop - projVbot);
 
       PVector force = PVector.mult(stringDir,(stringF+dampF));
       acc[j][i].add(PVector.mult(force,(-1.0/mass)));
@@ -150,16 +150,29 @@ void update(float dt){
     for (int i = 1; i < numNodes; i++){
       acc[j][i].add(PVector.mult(windDirection, windMagnitude));
       vel[j][i].add(PVector.mult(acc[j][i],(dt)));
+      vel[j][i].mult(0.9999); 
+      
       pos[j][i].add(PVector.mult(vel[j][i],(dt)));
     }
   }
+
+  for(int j = 0; j < numRopes; j++) {
+    for (int i = 1; i < numNodes; i++){
+      if(vel[j][i].x>250 ||vel[j][i].y>250 ||vel[j][i].z>250){
+        numNodes = 5;
+        numNode2 = 5;
+        break;
+      }
+    }
+  }
+
   println("acc[9][9]: ", acc[9][9].x, " ", acc[9][9].y, " ", acc[9][9].z);
   
   //Collision detection and response
   for(int j = 0; j < numRopes; j++) {
     for (int i = 0; i < numNodes; i++){
       if (pos[j][i].z+radius > floor){
-        vel[j][i].y *= -.9;
+        vel[j][i].y *= -.5;
         pos[j][i].y = floor - radius;
       }
     }
@@ -173,7 +186,7 @@ void update(float dt){
         n.normalize();
         float lengthInDirection = PVector.dot(n, vel[j][i]);
         PVector bounce = PVector.mult(n,(lengthInDirection));
-        vel[j][i].sub(PVector.mult(bounce,(1.5)));
+        vel[j][i].sub(PVector.mult(bounce,(1.1)));
         //pos[j][i] = PVector.mult(n, radiusObsticle+0.1);
         pos[j][i].add(PVector.mult(n,(0.1+radiusObsticle-d)));
       }
@@ -215,26 +228,27 @@ void draw() {
  
   fill(20,200,150);
 
-  for(int j = 0; j < numRopes; j++) {
-    for (int i = 0; i < numNodes-1; i++){
-      pushMatrix();
-      line(pos[j][i].x,pos[j][i].y,pos[j][i].z,pos[j][i+1].x,pos[j][i+1].y,pos[j][i+1].z);
-      translate(pos[j][i+1].x,pos[j][i+1].y,pos[j][i+1].z);
-      sphere(radius);
-      popMatrix();
-    }
-  }
+  // for(int j = 0; j < numRopes; j++) {
+  //   for (int i = 0; i < numNodes-1; i++){
+  //     pushMatrix();
+  //     line(pos[j][i].x,pos[j][i].y,pos[j][i].z,pos[j][i+1].x,pos[j][i+1].y,pos[j][i+1].z);
+  //     translate(pos[j][i+1].x,pos[j][i+1].y,pos[j][i+1].z);
+  //     sphere(radius);
+  //     popMatrix();
+  //   }
+  // }
 
-  for(int j = 0; j < numRopes-1; j++) {
-    for (int i = 0; i < numNodes; i++){
-      pushMatrix();
-      line(pos[j][i].x,pos[j][i].y,pos[j][i].z,pos[j+1][i].x,pos[j+1][i].y,pos[j+1][i].z);
-      popMatrix();
-    }
-  }
+  // for(int j = 0; j < numRopes-1; j++) {
+  //   for (int i = 0; i < numNodes; i++){
+  //     pushMatrix();
+  //     line(pos[j][i].x,pos[j][i].y,pos[j][i].z,pos[j+1][i].x,pos[j+1][i].y,pos[j+1][i].z);
+  //     popMatrix();
+  //   }
+  // }
 
 
   fill(0,255,0);
+  strokeWeight(0);
   for(int j = 0; j < numRopes-1; j++) {
     for(int i = 0; i < numNodes-1; i++) {
       beginShape();
@@ -271,12 +285,14 @@ void keyPressed(){
   }
 
   if(key == 'h') {
-    if(windMagnitude < 210) {
-      windMagnitude+=10;
-    }
-    else {
-      println("Woops, the wind can't be larger!");
-    }
+    // if(windMagnitude < 210) {
+    //   windMagnitude+=10;
+    // }
+    // else {
+    //   println("Woops, the wind can't be larger!");
+    // }
+    windMagnitude+=10;
+
     
   }
   camera.HandleKeyPressed();
