@@ -83,9 +83,10 @@ PVector acc[][] = new PVector[maxRope][maxNodes];
 
 int numNodes = 10;
 int numRopes = 50;
-int numNode2 =0;
+int numNodes2 =0;
 PVector windDirection = new PVector(0, 0, 1);
 float windMagnitude = 0;
+boolean windBreak = false;
 
 void initScene(){
   for(int j = 0; j < numRopes; j++) {
@@ -99,7 +100,6 @@ void initScene(){
 }
 
 void update(float dt){
-
   //Reset accelerations each timestep (momenum only applies to velocity)
   for(int j = 0; j < numRopes; j++) {
     for (int i = 0; i < numNodes; i++){
@@ -158,15 +158,14 @@ void update(float dt){
 
   for(int j = 0; j < numRopes; j++) {
     for (int i = 1; i < numNodes; i++){
-      if(vel[j][i].x>250 ||vel[j][i].y>250 ||vel[j][i].z>250){
+      if(windMagnitude > 220){
         numNodes = 5;
-        numNode2 = 5;
+        numNodes2 = 5;
+        windBreak = true;
         break;
       }
     }
   }
-
-  println("acc[9][9]: ", acc[9][9].x, " ", acc[9][9].y, " ", acc[9][9].z);
   
   //Collision detection and response
   for(int j = 0; j < numRopes; j++) {
@@ -197,6 +196,151 @@ void update(float dt){
   println("windmagnitude: ", windMagnitude);
 }
 
+
+void update2(float dt) {
+  for(int j = 0; j < numRopes; j++) {
+    for (int i = 0; i < numNodes; i++){
+      acc[j][i] = new PVector(0,0,0);
+      acc[j][i].add(gravity);
+    }
+
+    for(int i = 5; i < numNodes2; i++) {
+      acc[j][i] = new PVector(0,0,0);
+      acc[j][i].add(gravity);
+    }
+  }
+
+  for(int j = 0; j < numRopes-1; j++) {
+    for(int i = 0; i < numNodes; i++) {
+      PVector diff = PVector.sub(pos[j+1][i], pos[j][i]);
+      float stringF = -k*(diff.mag() - restLen);
+
+      PVector stringDir = diff;
+      stringDir.normalize();
+      float projVbot = PVector.dot(vel[j][i], stringDir);
+      float projVtop = PVector.dot(vel[j+1][i], stringDir);
+      float dampF = -kv*1.2*(projVtop - projVbot);
+
+      PVector force = PVector.mult(stringDir,(stringF+dampF));
+      acc[j][i].add(PVector.mult(force,(-1.0/mass)));
+      acc[j+1][i].add(PVector.mult(force,(1.0/mass)));
+    }
+
+    for(int i = 5; i < numNodes2; i++) {
+      PVector diff = PVector.sub(pos[j+1][i], pos[j][i]);
+      float stringF = -k*(diff.mag() - restLen);
+
+      PVector stringDir = diff;
+      stringDir.normalize();
+      float projVbot = PVector.dot(vel[j][i], stringDir);
+      float projVtop = PVector.dot(vel[j+1][i], stringDir);
+      float dampF = -kv*1.2*(projVtop - projVbot);
+
+      PVector force = PVector.mult(stringDir,(stringF+dampF));
+      acc[j][i].add(PVector.mult(force,(-1.0/mass)));
+      acc[j+1][i].add(PVector.mult(force,(1.0/mass)));
+    }
+  }
+
+  for(int j = 0; j < numRopes; j++) {
+    for (int i = 0; i < numNodes-1; i++){
+      PVector diff = PVector.sub(pos[j][i+1],pos[j][i]);
+      float stringF = -k*(diff.mag() - restLen);
+      //println(stringF,diff.length(),restLen);
+      
+      PVector stringDir = diff;
+      stringDir.normalize();
+      float projVbot = PVector.dot(vel[j][i], stringDir);
+      float projVtop = PVector.dot(vel[j][i+1], stringDir);
+      float dampF = -kv*(projVtop - projVbot);
+      
+      PVector force = PVector.mult(stringDir,(stringF+dampF));
+      acc[j][i].add(PVector.mult(force,(-1.0/mass)));
+      acc[j][i+1].add(PVector.mult(force,(1.0/mass)));
+    }
+
+    for(int i = 5; i < numNodes2-1; i++) {
+      PVector diff = PVector.sub(pos[j][i+1],pos[j][i]);
+      float stringF = -k*(diff.mag() - restLen);
+      //println(stringF,diff.length(),restLen);
+      
+      PVector stringDir = diff;
+      stringDir.normalize();
+      float projVbot = PVector.dot(vel[j][i], stringDir);
+      float projVtop = PVector.dot(vel[j][i+1], stringDir);
+      float dampF = -kv*(projVtop - projVbot);
+      
+      PVector force = PVector.mult(stringDir,(stringF+dampF));
+      acc[j][i].add(PVector.mult(force,(-1.0/mass)));
+      acc[j][i+1].add(PVector.mult(force,(1.0/mass)));
+    }
+  }
+
+  //Eulerian integration
+  for(int j = 0; j < numRopes; j++) {
+    for (int i = 1; i < numNodes; i++){
+      acc[j][i].add(PVector.mult(windDirection, windMagnitude));
+      vel[j][i].add(PVector.mult(acc[j][i],(dt)));
+      vel[j][i].mult(0.9999); 
+      
+      pos[j][i].add(PVector.mult(vel[j][i],(dt)));
+    }
+
+    for (int i = 5; i < numNodes2; i++){
+      acc[j][i].add(PVector.mult(windDirection, windMagnitude));
+      vel[j][i].add(PVector.mult(acc[j][i],(dt)));
+      vel[j][i].mult(0.9999); 
+      
+      pos[j][i].add(PVector.mult(vel[j][i],(dt)));
+    }
+  }
+  
+  //Collision detection and response
+  for(int j = 0; j < numRopes; j++) {
+    for (int i = 0; i < numNodes; i++){
+      if (pos[j][i].z+radius > floor){
+        vel[j][i].y *= -.5;
+        pos[j][i].y = floor - radius;
+      }
+    }
+
+    for (int i = 5; i < numNodes2; i++){
+      if (pos[j][i].z+radius > floor){
+        vel[j][i].y *= -.5;
+        pos[j][i].y = floor - radius;
+      }
+    }
+  }
+
+  for(int j = 0; j < numRopes; j++) {
+    for(int i = 0; i < numNodes; i++) {
+      float d = pos[j][i].dist(obsticle);
+      if(d < radiusObsticle +0.09) {
+        PVector n = PVector.sub(pos[j][i],(obsticle));
+        n.normalize();
+        float lengthInDirection = PVector.dot(n, vel[j][i]);
+        PVector bounce = PVector.mult(n,(lengthInDirection));
+        vel[j][i].sub(PVector.mult(bounce,(1.1)));
+        //pos[j][i] = PVector.mult(n, radiusObsticle+0.1);
+        pos[j][i].add(PVector.mult(n,(0.1+radiusObsticle-d)));
+      }
+    }
+
+    for(int i = 5; i < numNodes2; i++) {
+      float d = pos[j][i].dist(obsticle);
+      if(d < radiusObsticle +0.09) {
+        PVector n = PVector.sub(pos[j][i],(obsticle));
+        n.normalize();
+        float lengthInDirection = PVector.dot(n, vel[j][i]);
+        PVector bounce = PVector.mult(n,(lengthInDirection));
+        vel[j][i].sub(PVector.mult(bounce,(1.1)));
+        //pos[j][i] = PVector.mult(n, radiusObsticle+0.1);
+        pos[j][i].add(PVector.mult(n,(0.1+radiusObsticle-d)));
+      }
+    }
+  }
+}
+
 // Draws a scaled, textured quad at the given position.
 void drawTexturedQuad(PVector position, float scale, PImage texture)
 {
@@ -223,7 +367,15 @@ void draw() {
 
   for(int i = 0; i < 40; i++)
   {
-    if (!paused) update(1/(40*frameRate));
+    if (!paused) {
+      if(!windBreak) {
+        update(1/(40*frameRate));
+      }
+      else {
+        update2(1/(40*frameRate));
+      }
+    }
+     
   }
  
   fill(20,200,150);
