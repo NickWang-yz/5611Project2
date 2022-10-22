@@ -131,25 +131,25 @@ void draw() {
         if (!paused) update(dt);
     }
 
-    fill(0,255,0);
+    fill(220,220,220);
     pushMatrix();
     translate(rect_x[25]-6, -250, 200);
     box(600, 10, 400);
     popMatrix();
 
-    fill(0,255,0);
+    fill(220,220,220);
     pushMatrix();
     translate(0, 0, 200);
     box(10, 500, 400);
     popMatrix();
 
-    fill(0,255,0);
+    fill(220,220,220);
     pushMatrix();
     translate(rect_x[25]-6, 250, 200);
     box(600, 10, 400);
     popMatrix();
 
-    fill(0,255,0);
+    fill(220,220,220);
     pushMatrix();
     translate(rect_x[49], 0, 200);
     box(10, 500, 400);
