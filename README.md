@@ -28,6 +28,10 @@ Another issue that arises is how to apply air buoyancy and air resistance on clo
 # List of tools/Library used
 No tools and libraies are used besides what's provided to us. 
 
+Authored by Zirui Chen(chen6713) and Nick Wang(wang9205)
+
+
+
 
 
 
